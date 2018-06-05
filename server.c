@@ -6,7 +6,81 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+
+//global alphabet
+char* alpahbet[27] = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"," "};
+
+
 void error(const char *msg) { perror(msg); exit(1); } // Error function used for reporting issues
+
+//gets the index of a character in the alphabet. IE: L == 11
+int index_of(char* search) {
+    for (int i = 0; i < 27; ++i)
+    {
+      printf("%s\n", search );
+      if (strcmp(alpahbet[i], search) == 0)
+      {
+        return i;
+      }
+    }
+    return -1;
+}
+//loops through a faux alphabet starting at the index and ending at the traverse count / total IE: L + B = N
+
+int looper(int index, int traverseCount){
+  int trueindex = index;
+  for (int i = index; i < traverseCount; ++i)
+  {
+    trueindex++;
+    if (trueindex > 26)
+    {
+      trueindex = 0;
+    }
+  }
+  return trueindex;
+}
+//got this file read function from
+// https://stackoverflow.com/questions/3463426/in-c-how-should-i-read-a-text-file-and-print-all-strings
+char* ReadFile(char *filename, int* string_size)
+{
+   char *buffer = NULL;
+   int  read_size;
+   FILE *handler = fopen(filename, "r");
+
+   if (handler)
+   {
+      // Seek the last byte of the file
+      fseek(handler, 0, SEEK_END);
+      // Offset from the first to the last byte, or in other words, filesize
+      *string_size = ftell(handler);
+      // go back to the start of the file
+      rewind(handler);
+
+      // Allocate a string that can hold it all
+      buffer = (char*) malloc(sizeof(char) * (*string_size + 1) );
+      // Read it all in one operation
+      read_size = fread(buffer, sizeof(char), *string_size, handler);
+      // fread doesn't set it so put a \0 in the last position
+      // and buffer is now officially a string
+      buffer[*string_size] = '\0';
+
+      if (*string_size != read_size)
+      {
+        // Something went wrong, throw away the memory and set
+        // the buffer to NULL
+        free(buffer);
+        buffer = NULL;
+      }
+      // Always remember to close the file.
+      fclose(handler);
+  }
+
+return buffer;
+}
+
+char* encryptFile(char* keyfile, char* textfile, int keyfileSize, int textfileSize){
+  char *buffer = NULL;
+} 
 
 int main(int argc, char *argv[])
 {
@@ -43,6 +117,28 @@ int main(int argc, char *argv[])
 	charsRead = recv(establishedConnectionFD, buffer, 255, 0); // Read the client's message from the socket
 	if (charsRead < 0) error("ERROR reading from socket");
 	printf("SERVER: I received this from the client: \"%s\"\n", buffer);
+  
+  //key will hold the key while buffer will hold the textfile for encryption 
+  char* key;
+  strtok_r(buffer, "\n", &key);
+
+  //create and fill buffers for the key and file contents
+  int keyfileSize;
+  int textfileSize;
+
+  char* keyfile = ReadFile(key,&keyfileSize);
+  char* textfile = ReadFile(buffer,&textfileSize);
+
+  //keyfile size is two char bigger from /0 and /n
+  //throw error if the keyfile size is too small
+  if (keyfileSize <= textfileSize + 1) error("ERROR Key is too small");
+  
+  char* encryptedFile = encryptFile(keyfile, textfile, keyfileSize, textfileSize);
+
+
+ 
+
+
 
 	// Send a Success message back to the client
 	charsRead = send(establishedConnectionFD, "I am the server, and I got your message", 39, 0); // Send success back
