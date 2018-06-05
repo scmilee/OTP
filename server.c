@@ -8,17 +8,17 @@
 
 
 //global alphabet
-char* alpahbet[27] = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"," "};
-
+char* alphabet[27] = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"," "};
 
 void error(const char *msg) { perror(msg); exit(1); } // Error function used for reporting issues
 
 //gets the index of a character in the alphabet. IE: L == 11
-int index_of(char* search) {
+int index_of(char search) {
+ 
+
     for (int i = 0; i < 27; ++i)
     {
-      printf("%s\n", search );
-      if (strcmp(alpahbet[i], search) == 0)
+      if (*alphabet[i]== search)
       {
         return i;
       }
@@ -32,17 +32,18 @@ int looper(int index, int traverseCount){
   for (int i = index; i < traverseCount; ++i)
   {
     trueindex++;
+
     if (trueindex > 26)
     {
       trueindex = 0;
     }
   }
+  //printf("%d, %d, %d\n", trueindex,index,traverseCount );
   return trueindex;
 }
 //got this file read function from
 // https://stackoverflow.com/questions/3463426/in-c-how-should-i-read-a-text-file-and-print-all-strings
-char* ReadFile(char *filename, int* string_size)
-{
+char* ReadFile(char *filename, int* string_size){
    char *buffer = NULL;
    int  read_size;
    FILE *handler = fopen(filename, "r");
@@ -78,8 +79,31 @@ char* ReadFile(char *filename, int* string_size)
 return buffer;
 }
 
-char* encryptFile(char* keyfile, char* textfile, int keyfileSize, int textfileSize){
-  char *buffer = NULL;
+void encryptFile(char* keyfile, char* textfile, int textfileSize,char *buffer){
+  
+  int traverseCount;
+  int index;
+  int encryptedIndex;
+
+  for (int i = 0; i < textfileSize; ++i){
+    //get the index of both letters from each file
+    traverseCount = index_of(keyfile[i]);
+    index = index_of(textfile[i]);
+    traverseCount += index;
+    //++ to account for it being an array index
+    traverseCount++;
+    //get the destined index from the looper
+    encryptedIndex = looper(index, traverseCount);
+    //printf("%c + %c = %d\n" ,textfile[i],keyfile[i], encryptedIndex );
+
+    strcat(buffer, alphabet[encryptedIndex]);
+    //reset for next iteration
+    index = 0;
+    traverseCount = 0;
+    encryptedIndex = 0;
+
+  }
+
 } 
 
 int main(int argc, char *argv[])
@@ -133,15 +157,15 @@ int main(int argc, char *argv[])
   //throw error if the keyfile size is too small
   if (keyfileSize <= textfileSize + 1) error("ERROR Key is too small");
   
-  char* encryptedFile = encryptFile(keyfile, textfile, keyfileSize, textfileSize);
-
-
- 
-
+  char * encryptedFile;
+  encryptedFile = malloc(textfileSize + 1);
+  encryptFile(keyfile, textfile, textfileSize, encryptedFile);
+   printf("here it is encoded :%s\n", encryptedFile);
 
 
 	// Send a Success message back to the client
-	charsRead = send(establishedConnectionFD, "I am the server, and I got your message", 39, 0); // Send success back
+	charsRead = send(establishedConnectionFD, encryptedFile, textfileSize, 0); // Send success back
+  free(encryptedFile);
 	if (charsRead < 0) error("ERROR writing to socket");
 	close(establishedConnectionFD); // Close the existing socket which is connected to the client
 	close(listenSocketFD); // Close the listening socket
