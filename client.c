@@ -16,9 +16,6 @@ int main(int argc, char *argv[])
 	struct hostent* serverHostInfo;
 	char buffer[256];
   memset(buffer, '\0', sizeof(buffer));
-
- 
-  
     
 	if (argc != 4) { fprintf(stderr,"USAGE: %s text key port\n", argv[0]); exit(0); } // Check usage & args
 
@@ -60,9 +57,9 @@ int main(int argc, char *argv[])
 	// Get return message from server
 	memset(buffer, '\0', sizeof(buffer)); // Clear out the buffer again for reuse
 	charsRead = recv(socketFD, buffer, sizeof(buffer) - 1, 0); // Read data from the socket, leaving \0 at end
+  free(package);
 	if (charsRead < 0) error("CLIENT: ERROR reading from socket");
 	printf("CLIENT: I received this from the server: \"%s\"\n", buffer);
-  free(package);
 	close(socketFD); // Close the socket
 	return 0;
 }
