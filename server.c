@@ -14,7 +14,6 @@ void error(const char *msg) { perror(msg); exit(1); } // Error function used for
 
 //gets the index of a character in the alphabet. IE: L == 11
 int index_of(char search) {
- 
 
     for (int i = 0; i < 27; ++i)
     {
@@ -94,16 +93,16 @@ void encryptFile(char* keyfile, char* textfile, int textfileSize,char *buffer){
     traverseCount++;
     //get the destined index from the looper
     encryptedIndex = looper(index, traverseCount);
-    printf("%c + %c = %d\n" ,textfile[i],keyfile[i], encryptedIndex );
-	if(i == 0){
-	strcpy(buffer, alphabet[encryptedIndex]);
-	}
-	else{
-    	strcat(buffer, alphabet[encryptedIndex]);
-	}    //reset for next iteration
-    index = 0;
-    traverseCount = 0;
-    encryptedIndex = 0;
+    //printf("%c + %c = %d\n" ,textfile[i],keyfile[i], encryptedIndex );
+  	if(i == 0){
+  	 strcpy(buffer, alphabet[encryptedIndex]);
+  	}
+  	else{
+      	strcat(buffer, alphabet[encryptedIndex]);
+  	}    //reset for next iteration
+      index = 0;
+      traverseCount = 0;
+      encryptedIndex = 0;
 
   }
 
@@ -171,8 +170,7 @@ int main(int argc, char *argv[])
   char * encryptedFile;
   encryptedFile = malloc(textfileSize + 1);
   encryptFile(keyfile, textfile, textfileSize, encryptedFile);
-   printf("here it is encoded :%s\n", encryptedFile);
-
+  //printf("here it is encoded :%s\n", encryptedFile);
 
 	// Send a Success message back to the client
 	charsRead = send(establishedConnectionFD, encryptedFile, textfileSize + 1, 0); // Send success back
