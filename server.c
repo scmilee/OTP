@@ -142,16 +142,24 @@ int main(int argc, char *argv[])
 	if (charsRead < 0) error("ERROR reading from socket");
 	printf("SERVER: I received this from the client: \"%s\"\n", buffer);
   
+  char* keyAndtext;
+  strtok_r(buffer, "\n", &keyAndtext);
+  //the buffer now holds the client ID for checking
+
+  if (strcmp(buffer, "otp_enc")!= 0)
+  {
+    error("ERROR only otp_enc may communicate with this server.");
+  }
   //key will hold the key while buffer will hold the textfile for encryption 
   char* key;
-  strtok_r(buffer, "\n", &key);
-
+  strtok_r(keyAndtext, "\n", &key );
   //create and fill buffers for the key and file contents
   int keyfileSize;
   int textfileSize;
+  
 
   char* keyfile = ReadFile(key,&keyfileSize);
-  char* textfile = ReadFile(buffer,&textfileSize);
+  char* textfile = ReadFile(keyAndtext,&textfileSize);
 
   //keyfile size is two char bigger from /0 and /n
   //throw error if the keyfile size is too small

@@ -40,14 +40,21 @@ int main(int argc, char *argv[])
 	char * key = argv[2];
   char * text= argv[1];
   char* package;
-  package = malloc(strlen(key)+strlen(text) + 2);
+  char* identity = "otp_enc";
+  package = malloc(strlen(key)+strlen(text) +strlen(identity)+ 2);
 
-  strcpy(package, text);
+  //put the identity into the package
+  strcpy(package, identity);
   strcat(package, "\n");
+  //put the text file name into the package
+  strcat(package, text);
+  strcat(package, "\n");
+  //put the keyfile name into the package
   strcat(package, key);
   strcat(package, "\0");
 
   strcpy(buffer,package);
+
 	// Send message to server
 
 	charsWritten = send(socketFD, buffer, strlen(buffer), 0); // Write to the server
