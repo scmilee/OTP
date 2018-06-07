@@ -38,6 +38,10 @@ int main(int argc, char *argv[])
   }
   //generate it
   generateKey(key, keySize);
+  char* buffer;
+  //remove ugly memory from key
+  strtok_r(key, "\n" , &buffer);
+  strcat(key, "\n");
   //print it out 
   printf("%s", key);
 
