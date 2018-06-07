@@ -85,7 +85,7 @@ void encryptFile(char* keyfile, char* textfile, int textfileSize,char *buffer){
   int index;
   int encryptedIndex;
 
-  for (int i = 0; i < textfileSize; ++i){
+  for (int i = 0; i < textfileSize - 1; ++i){
     //get the index of both letters from each file
     traverseCount = index_of(keyfile[i]);
     index = index_of(textfile[i]);
@@ -94,10 +94,13 @@ void encryptFile(char* keyfile, char* textfile, int textfileSize,char *buffer){
     traverseCount++;
     //get the destined index from the looper
     encryptedIndex = looper(index, traverseCount);
-    //printf("%c + %c = %d\n" ,textfile[i],keyfile[i], encryptedIndex );
-
-    strcat(buffer, alphabet[encryptedIndex]);
-    //reset for next iteration
+    printf("%c + %c = %d\n" ,textfile[i],keyfile[i], encryptedIndex );
+	if(i == 0){
+	strcpy(buffer, alphabet[encryptedIndex]);
+	}
+	else{
+    	strcat(buffer, alphabet[encryptedIndex]);
+	}    //reset for next iteration
     index = 0;
     traverseCount = 0;
     encryptedIndex = 0;
@@ -163,7 +166,7 @@ int main(int argc, char *argv[])
 
   //keyfile size is two char bigger from /0 and /n
   //throw error if the keyfile size is too small
-  if (keyfileSize <= textfileSize + 1) error("ERROR Key is too small");
+  if (keyfileSize != textfileSize) error("ERROR Key is too small");
   
   char * encryptedFile;
   encryptedFile = malloc(textfileSize + 1);
@@ -172,7 +175,7 @@ int main(int argc, char *argv[])
 
 
 	// Send a Success message back to the client
-	charsRead = send(establishedConnectionFD, encryptedFile, textfileSize, 0); // Send success back
+	charsRead = send(establishedConnectionFD, encryptedFile, textfileSize + 1, 0); // Send success back
   free(encryptedFile);
 	if (charsRead < 0) error("ERROR writing to socket");
 	close(establishedConnectionFD); // Close the existing socket which is connected to the client
