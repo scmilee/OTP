@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
   char * text= argv[1];
   char* rackage;
   char* identity = "otp_dec";
-  rackage = (char *)malloc(strlen(key)+strlen(text) +strlen(identity)+ 2);
+  rackage = malloc(strlen(key)+strlen(text) +strlen(identity)+ 2);
 
   //put the identity into the package
   strcpy(rackage, identity);
