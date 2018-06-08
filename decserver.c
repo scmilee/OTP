@@ -175,7 +175,12 @@ int main(int argc, char *argv[])
 
       //keyfile size is two char bigger from /0 and /n
       //throw error if the keyfile size is too small
-      if (keyfileSize < textfileSize) error("ERROR Key is too small");
+      if (keyfileSize < textfileSize){
+        //send an error back to the client for complete closure
+         charsRead = send(establishedConnectionFD, "Key Size is Too small", 21, 0); 
+        close(establishedConnectionFD); // Close the existing socket which is connected to the client
+         exit(1);
+      }
       
       char * encryptedFile;
       encryptedFile = malloc(textfileSize + 1);
