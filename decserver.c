@@ -127,56 +127,73 @@ int main(int argc, char *argv[])
   // Set up the socket
   listenSocketFD = socket(AF_INET, SOCK_STREAM, 0); // Create the socket
   if (listenSocketFD < 0) error("ERROR opening socket");
-
-  // Enable the socket to begin listening
+     // Enable the socket to begin listening
   if (bind(listenSocketFD, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) // Connect socket to port
-    error("ERROR on binding");
+     error("ERROR on binding");
   listen(listenSocketFD, 5); // Flip the socket on - it can now receive up to 5 connections
 
-  // Accept a connection, blocking if one is not available until one connects
-  sizeOfClientInfo = sizeof(clientAddress); // Get the size of the address for the client that will connect
-  establishedConnectionFD = accept(listenSocketFD, (struct sockaddr *)&clientAddress, &sizeOfClientInfo); // Accept
-  if (establishedConnectionFD < 0) error("ERROR on accept");
+  pid_t pid;
+  //enter into a loop for main, so it will constantly accept new connections
+  while(1){
 
-  // Get the message from the client and display it
-  memset(buffer, '\0', 256);
-  charsRead = recv(establishedConnectionFD, buffer, 255, 0); // Read the client's message from the socket
-  if (charsRead < 0) error("ERROR reading from socket");
-  printf("SERVER: I received this from the client: \"%s\"\n", buffer);
-  
-  char* keyAndtext;
-  strtok_r(buffer, "\n", &keyAndtext);
-  //the buffer now holds the client ID for checking
+    // Accept a connection, blocking if one is not available until one connects
+    sizeOfClientInfo = sizeof(clientAddress); // Get the size of the address for the client that will connect
+    establishedConnectionFD = accept(listenSocketFD, (struct sockaddr *)&clientAddress, &sizeOfClientInfo); // Accept
+    if (establishedConnectionFD < 0) error("ERROR on accept");
+    //fork a child off 
+    pid = fork();
+    int currentStatus;
+    //catch fork failure
+    if(pid < 0){
+      error("Error forking child");
+      exit(1);
+        }
+    if (pid == 0){
+      // Get the message from the client and display it
+      memset(buffer, '\0', 256);
+      charsRead = recv(establishedConnectionFD, buffer, 255, 0); // Read the client's message from the socket
+      if (charsRead < 0) error("ERROR reading from socket");
+      printf("SERVER: I received this from the client: \"%s\"\n", buffer);
+      
+      char* keyAndtext;
+      strtok_r(buffer, "\n", &keyAndtext);
+      //the buffer now holds the client ID for checking
 
-  if (strcmp(buffer, "otp_dec")!= 0)
-  {
-    error("ERROR only otp_enc may communicate with this server.");
+      if (strcmp(buffer, "otp_dec")!= 0)
+      {
+        error("ERROR only otp_enc may communicate with this server.");
+      }
+      //key will hold the key while buffer will hold the textfile for encryption 
+      char* key;
+      strtok_r(keyAndtext, "\n", &key );
+      //create and fill buffers for the key and file contents
+      int keyfileSize;
+      int textfileSize;
+      
+
+      char* keyfile = ReadFile(key,&keyfileSize);
+      char* textfile = ReadFile(keyAndtext,&textfileSize);
+
+      //keyfile size is two char bigger from /0 and /n
+      //throw error if the keyfile size is too small
+      if (keyfileSize != textfileSize) error("ERROR Key is too small");
+      
+      char * encryptedFile;
+      encryptedFile = malloc(textfileSize + 1);
+      encryptFile(keyfile, textfile, textfileSize, encryptedFile);
+      //printf("here it is encoded :%s\n", encryptedFile);
+
+      // Send a Success message back to the client
+      charsRead = send(establishedConnectionFD, encryptedFile, textfileSize + 1, 0); // Send success back
+      free(encryptedFile);
+      if (charsRead < 0) error("ERROR writing to socket");
+      close(establishedConnectionFD); // Close the existing socket which is connected to the client
+      //exit for the child
+      _exit(0);
+    }
+     //dont wait for child processes
+    waitpid(pid, &currentStatus, WNOHANG);
   }
-  //key will hold the key while buffer will hold the textfile for encryption 
-  char* key;
-  strtok_r(keyAndtext, "\n", &key );
-  //create and fill buffers for the key and file contents
-  int keyfileSize;
-  int textfileSize;
-  
-
-  char* keyfile = ReadFile(key,&keyfileSize);
-  char* textfile = ReadFile(keyAndtext,&textfileSize);
-
-  //keyfile size is two char bigger from /0 and /n
-  //throw error if the keyfile size is too small
-  if (keyfileSize != textfileSize) error("ERROR Key is too small");
-  
-  char * encryptedFile;
-  encryptedFile = malloc(textfileSize + 1);
-  encryptFile(keyfile, textfile, textfileSize, encryptedFile);
-  //printf("here it is encoded :%s\n", encryptedFile);
-
-  // Send a Success message back to the client
-  charsRead = send(establishedConnectionFD, encryptedFile, textfileSize + 1, 0); // Send success back
-  free(encryptedFile);
-  if (charsRead < 0) error("ERROR writing to socket");
-  close(establishedConnectionFD); // Close the existing socket which is connected to the client
   close(listenSocketFD); // Close the listening socket
   return 0; 
 }
