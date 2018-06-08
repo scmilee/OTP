@@ -160,7 +160,10 @@ int main(int argc, char *argv[])
 
       if (strcmp(buffer, "otp_dec")!= 0)
       {
-        error("ERROR only otp_enc may communicate with this server.");
+        //send an error back to the client for complete closure
+         charsRead = send(establishedConnectionFD, "Error only otp_dec can talk with this server.", 45, 0); 
+        close(establishedConnectionFD); // Close the existing socket which is connected to the client
+         exit(1);
       }
       //key will hold the key while buffer will hold the textfile for encryption 
       char* key;
