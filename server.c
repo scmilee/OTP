@@ -5,6 +5,7 @@
 #include <sys/types.h> 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <sys/wait.h>
 
 
 //global alphabet
@@ -153,7 +154,7 @@ int main(int argc, char *argv[])
     	memset(buffer, '\0', 256);
     	charsRead = recv(establishedConnectionFD, buffer, 255, 0); // Read the client's message from the socket
     	if (charsRead < 0) error("ERROR reading from socket");
-    	printf("SERVER: I received this from the client: \"%s\"\n", buffer);
+    //	printf("SERVER: I received this from the client: \"%s\"\n", buffer);
       
       char* keyAndtext;
       strtok_r(buffer, "\n", &keyAndtext);
@@ -177,9 +178,12 @@ int main(int argc, char *argv[])
       printf("%d %d\n",keyfileSize, textfileSize );
       //throw error if the keyfile size is too small
       if (keyfileSize < textfileSize){
+        //send an error back to the client for complete closure
          charsRead = send(establishedConnectionFD, "Key Size is Too small", 21, 0); 
+        close(establishedConnectionFD); // Close the existing socket which is connected to the client
          exit(1);
       }
+
       
       char * encryptedFile;
       encryptedFile = malloc(textfileSize + 1);
