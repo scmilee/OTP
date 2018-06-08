@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
   char * text= argv[1];
   char* package;
   char* identity = "otp_enc";
-  package = malloc(strlen(key)+strlen(text) +strlen(identity)+ 2);
+  package = (char *)malloc(strlen(key)+strlen(text) +strlen(identity)+ 2);
 
   //put the identity into the package
   strcpy(package, identity);
@@ -68,6 +68,6 @@ int main(int argc, char *argv[])
 	if (charsRead < 0) error("CLIENT: ERROR reading from socket");
 	printf("%s\n", buffer);
 	close(socketFD); // Close the socket
-	//free(package);
+	free(package);
   return 0;
 }
