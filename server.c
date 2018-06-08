@@ -174,9 +174,12 @@ int main(int argc, char *argv[])
       char* keyfile = ReadFile(key,&keyfileSize);
       char* textfile = ReadFile(keyAndtext,&textfileSize);
 
-      //keyfile size is two char bigger from /0 and /n
+      printf("%d %d\n",keyfileSize, textfileSize );
       //throw error if the keyfile size is too small
-      if (keyfileSize != textfileSize) error("ERROR Key is too small");
+      if (keyfileSize < textfileSize){
+         charsRead = send(establishedConnectionFD, "Key Size is Too small", 21, 0); 
+         exit(1);
+      }
       
       char * encryptedFile;
       encryptedFile = malloc(textfileSize + 1);

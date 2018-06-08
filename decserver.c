@@ -103,7 +103,6 @@ void encryptFile(char* keyfile, char* textfile, int textfileSize,char *buffer){
       index = 0;
       traverseCount = 0;
       encryptedIndex = 0;
-
   }
 
 } 
