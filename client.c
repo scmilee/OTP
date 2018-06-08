@@ -35,14 +35,13 @@ int main(int argc, char *argv[])
 	// Connect to server
 	if (connect(socketFD, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) // Connect socket to address
 		error("CLIENT: ERROR connecting");
-
+  char buff[70001];
 	// Get input message from user
 	char * key = argv[2];
   char * text= argv[1];
-  char* package;
+  char* package = buff;
   char* identity = "otp_enc";
-  package = (char *)malloc(strlen(key)+strlen(text) +strlen(identity)+ 2);
-
+  
   //put the identity into the package
   strcpy(package, identity);
   strcat(package, "\n");
@@ -68,6 +67,6 @@ int main(int argc, char *argv[])
 	if (charsRead < 0) error("CLIENT: ERROR reading from socket");
 	printf("%s\n", buffer);
 	close(socketFD); // Close the socket
-	free(package);
+	//free(package);
   return 0;
 }
