@@ -39,21 +39,21 @@ int main(int argc, char *argv[])
   // Get input message from user
   char * key = argv[2];
   char * text= argv[1];
-  char* package;
+  char* rackage;
   char* identity = "otp_dec";
-  package = malloc(strlen(key)+strlen(text) +strlen(identity)+ 2);
+  rackage = malloc(strlen(key)+strlen(text) +strlen(identity)+ 2);
 
   //put the identity into the package
-  strcpy(package, identity);
-  strcat(package, "\n");
+  strcpy(rackage, identity);
+  strcat(rackage, "\n");
   //put the text file name into the package
-  strcat(package, text);
-  strcat(package, "\n");
+  strcat(rackage, text);
+  strcat(rackage, "\n");
   //put the keyfile name into the package
-  strcat(package, key);
-  strcat(package, "\0");
+  strcat(rackage, key);
+  strcat(rackage, "\0");
 
-  strcpy(buffer,package);
+  strcpy(buffer,rackage);
 
   // Send message to server
 
@@ -67,6 +67,6 @@ int main(int argc, char *argv[])
   if (charsRead < 0) error("CLIENT: ERROR reading from socket");
   printf("%s\n", buffer);
   close(socketFD); // Close the socket
-  free(package);
+  free(rackage);
   return 0;
 }
