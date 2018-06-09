@@ -9,6 +9,29 @@
 
 //global alphabet
 char* alphabet[27] = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"," "};
+int bgProcesses[100];
+int bgCount = 0;
+
+void checkBg() {
+  int currentStat;
+  for(int i = 0; i < bgCount; i++) 
+  { 
+    if(waitpid(bgProcesses[i], &currentStat, WNOHANG) > 0)
+    {
+      //check if it was signaled to exit
+      //or just get its exit code
+      if(WIFSIGNALED(currentStat)) 
+      {
+        printf("\nChild %d exited with status: %d\n", bgProcesses[i], WTERMSIG(currentStat));
+      }
+      //check if it exited on its own
+      if(WIFEXITED(currentStat)) 
+      { 
+        printf("\nChild %d exited with status: %d\n", bgProcesses[i], WEXITSTATUS(currentStat));
+      }
+    }
+  }
+}
 
 void error(const char *msg) { perror(msg); exit(1); } // Error function used for reporting issues
 
@@ -161,7 +184,7 @@ int main(int argc, char *argv[])
       if (strcmp(buffer, "otp_dec")!= 0)
       {
         //send an error back to the client for complete closure
-         charsRead = send(establishedConnectionFD, "Error only otp_dec can talk with this server.", 45, 0); 
+         charsRead = send(establishedConnectionFD, "Error only otp_dec can talk with this server.;", 46, 0); 
         close(establishedConnectionFD); // Close the existing socket which is connected to the client
          exit(1);
       }
@@ -172,7 +195,6 @@ int main(int argc, char *argv[])
       int keyfileSize;
       int textfileSize;
       
-
       char* keyfile = ReadFile(key,&keyfileSize);
       char* textfile = ReadFile(keyAndtext,&textfileSize);
 
@@ -180,7 +202,7 @@ int main(int argc, char *argv[])
       //throw error if the keyfile size is too small
       if (keyfileSize < textfileSize){
         //send an error back to the client for complete closure
-         charsRead = send(establishedConnectionFD, "Key Size is Too small", 21, 0); 
+         charsRead = send(establishedConnectionFD, "Key Size is Too small;", 22, 0); 
         close(establishedConnectionFD); // Close the existing socket which is connected to the client
          exit(1);
       }
@@ -198,8 +220,10 @@ int main(int argc, char *argv[])
       //exit for the child
       _exit(0);
     }
-     //dont wait for child processes
+    bgProcesses[bgCount] = pid;
+    bgCount++;
     waitpid(pid, &currentStatus, WNOHANG);
+    checkBg();
   }
   close(listenSocketFD); // Close the listening socket
   return 0; 

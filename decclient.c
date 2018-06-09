@@ -15,6 +15,7 @@ int main(int argc, char *argv[])
   struct sockaddr_in serverAddress;
   struct hostent* serverHostInfo;
   char buffer[70001];
+  char buff[70001];
   memset(buffer, '\0', sizeof(buffer));
     
   if (argc != 4) { fprintf(stderr,"USAGE: %s text key port\n", argv[0]); exit(0); } // Check usage & args
@@ -63,9 +64,20 @@ int main(int argc, char *argv[])
 
   // Get return message from server
   memset(buffer, '\0', sizeof(buffer)); // Clear out the buffer again for reuse
-  charsRead = recv(socketFD, buffer, sizeof(buffer) - 1, 0); // Read data from the socket, leaving \0 at end
+  memset(buff, '\0', sizeof(buffer));
+  char* removecolon;
+  
+  while(strchr(buffer, ';') == NULL){
+    memset(buffer, '\0', sizeof(buffer));
+    charsRead = recv(socketFD, buffer, sizeof(buffer) - 1, 0); // Read data from the socket, leaving \0 at end
+    strcat(buff, buffer);
+  }
+  
+  //remove the identifier for the end of the file
+  removecolon = strchr(buff, ';');
+  *removecolon = '\0';
   if (charsRead < 0) error("CLIENT: ERROR reading from socket");
-  printf("%s\n", buffer);
+  printf("%s\n", buff);
   close(socketFD); // Close the socket
   free(rackage);
   return 0;

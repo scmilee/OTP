@@ -10,6 +10,17 @@
 
 //global alphabet
 char* alphabet[27] = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"," "};
+int bgProcesses[100];
+int bgCount = 0;
+
+//my checkbg function from smallsh
+void checkBg() {
+  int currentStat;
+  for(int i = 0; i < bgCount; i++) 
+  { 
+    waitpid(bgProcesses[i], &currentStat, WNOHANG);
+  }
+}
 
 void error(const char *msg) { perror(msg); exit(1); } // Error function used for reporting issues
 
@@ -79,16 +90,25 @@ char* ReadFile(char *filename, int* string_size){
 return buffer;
 }
 
-void encryptFile(char* keyfile, char* textfile, int textfileSize,char *buffer){
+void encryptFile(char* keyfile, char* textfile, int textfileSize,char *buffer,int establishedConnectionFD){
   
   int traverseCount;
   int index;
   int encryptedIndex;
+  int charsRead;
 
   for (int i = 0; i < textfileSize - 1; ++i){
     //get the index of both letters from each file
     traverseCount = index_of(keyfile[i]);
     index = index_of(textfile[i]);
+
+    if (index == -1)
+    {
+      //send an error back to the client for complete closure
+      charsRead = send(establishedConnectionFD, "Error Text file has invalid characters.;", 40, 0); 
+      close(establishedConnectionFD); // Close the existing socket which is connected to the client
+      exit(1);
+    }
     traverseCount += index;
     //++ to account for it being an array index
     traverseCount++;
@@ -163,7 +183,7 @@ int main(int argc, char *argv[])
       if (strcmp(buffer, "otp_enc")!= 0)
       {
         //send an error back to the client for complete closure
-         charsRead = send(establishedConnectionFD, "Error only otp_enc can talk with this server.", 45, 0); 
+         charsRead = send(establishedConnectionFD, "Error only otp_enc can talk with this server.;", 46, 0); 
         close(establishedConnectionFD); // Close the existing socket which is connected to the client
          exit(1);
       }
@@ -178,11 +198,11 @@ int main(int argc, char *argv[])
       char* keyfile = ReadFile(key,&keyfileSize);
       char* textfile = ReadFile(keyAndtext,&textfileSize);
 
-      printf("%d %d\n",keyfileSize, textfileSize );
+      
       //throw error if the keyfile size is too small
       if (keyfileSize < textfileSize){
         //send an error back to the client for complete closure
-         charsRead = send(establishedConnectionFD, "Key Size is Too small", 21, 0); 
+         charsRead = send(establishedConnectionFD, "Key Size is Too small;", 22, 0); 
         close(establishedConnectionFD); // Close the existing socket which is connected to the client
          exit(1);
       }
@@ -190,19 +210,23 @@ int main(int argc, char *argv[])
       
       char * encryptedFile;
       encryptedFile = malloc(textfileSize + 1);
-      encryptFile(keyfile, textfile, textfileSize, encryptedFile);
+      encryptFile(keyfile, textfile, textfileSize, encryptedFile, establishedConnectionFD);
       //printf("here it is encoded :%s\n", encryptedFile);
-
+      strcat(encryptedFile, ";");
     	// Send a Success message back to the client
-    	charsRead = send(establishedConnectionFD, encryptedFile, textfileSize + 1, 0); // Send success back
+     
+    	 charsRead = send(establishedConnectionFD, encryptedFile, textfileSize + 2, 0); // Send success back
       free(encryptedFile);
     	if (charsRead < 0) error("ERROR writing to socket");
     	close(establishedConnectionFD); // Close the existing socket which is connected to the client
       //exit for the child
       _exit(0);
     }
-    //dont wait for child processes
+
+    bgProcesses[bgCount] = pid;
+    bgCount++;
     waitpid(pid, &currentStatus, WNOHANG);
+    checkBg();
   }
 	close(listenSocketFD); // Close the listening socket
 	return 0; 

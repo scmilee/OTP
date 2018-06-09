@@ -55,17 +55,23 @@ int main(int argc, char *argv[])
   strcpy(buffer,package);
 
 	// Send message to server
-
+  char* removecolon;
 	charsWritten = send(socketFD, buffer, strlen(buffer), 0); // Write to the server
 	if (charsWritten < 0) error("CLIENT: ERROR writing to socket");
 	if (charsWritten < strlen(buffer)) printf("CLIENT: WARNING: Not all data written to socket!\n");
-
 	// Get return message from server
 	memset(buffer, '\0', sizeof(buffer)); // Clear out the buffer again for reuse
-	charsRead = recv(socketFD, buffer, sizeof(buffer) - 1, 0); // Read data from the socket, leaving \0 at end
+  memset(buff, '\0', sizeof(buffer));
   
+  while(strchr(buffer, ';') == NULL){
+    memset(buffer, '\0', sizeof(buffer));
+  	charsRead = recv(socketFD, buffer, sizeof(buffer) - 1, 0); // Read data from the socket, leaving \0 at end
+    strcat(buff, buffer);
+  }
+  removecolon = strchr(buff, ';');
+  *removecolon = '\0';
 	if (charsRead < 0) error("CLIENT: ERROR reading from socket");
-	printf("%s\n", buffer);
+	printf("%s\n", buff);
 	close(socketFD); // Close the socket
 	//free(package);
   return 0;
