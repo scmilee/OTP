@@ -16,20 +16,7 @@ void checkBg() {
   int currentStat;
   for(int i = 0; i < bgCount; i++) 
   { 
-    if(waitpid(bgProcesses[i], &currentStat, WNOHANG) > 0)
-    {
-      //check if it was signaled to exit
-      //or just get its exit code
-      if(WIFSIGNALED(currentStat)) 
-      {
-        printf("\nChild %d exited with status: %d\n", bgProcesses[i], WTERMSIG(currentStat));
-      }
-      //check if it exited on its own
-      if(WIFEXITED(currentStat)) 
-      { 
-        printf("\nChild %d exited with status: %d\n", bgProcesses[i], WEXITSTATUS(currentStat));
-      }
-    }
+   waitpid(bgProcesses[i], &currentStat, WNOHANG);
   }
 }
 
