@@ -105,7 +105,8 @@ void encryptFile(char* keyfile, char* textfile, int textfileSize,char *buffer,in
     if (index == -1)
     {
       //send an error back to the client for complete closure
-      charsRead = send(establishedConnectionFD, "Error Text file has invalid characters.;", 40, 0); 
+      charsRead = send(establishedConnectionFD, "", 0, 0); 
+      error("Error invalid characters in file.");
       close(establishedConnectionFD); // Close the existing socket which is connected to the client
       exit(1);
     }
