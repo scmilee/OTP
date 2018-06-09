@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
       encryptedFile = malloc(textfileSize + 1);
       encryptFile(keyfile, textfile, textfileSize, encryptedFile);
       //printf("here it is encoded :%s\n", encryptedFile);
-
+      strcat(encryptedFile, ";");
       // Send a Success message back to the client
       charsRead = send(establishedConnectionFD, encryptedFile, textfileSize + 1, 0); // Send success back
       free(encryptedFile);
