@@ -7,7 +7,12 @@
 #include <netinet/in.h>
 #include <netdb.h> 
 
-void error(const char *msg) { perror(msg); exit(0); } // Error function used for reporting issues
+void error(const char *msg) { 
+
+  fprintf(stderr, "%s\n", msg);
+   exit(1);
+
+ }
 
 int main(int argc, char *argv[])
 {
@@ -34,8 +39,10 @@ int main(int argc, char *argv[])
   if (socketFD < 0) error("CLIENT: ERROR opening socket");
   
   // Connect to server
-  if (connect(socketFD, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) // Connect socket to address
-    error("CLIENT: ERROR connecting");
+  if (connect(socketFD, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0){ // Connect socket to address
+    fprintf(stderr, "Error: could not contact otp_dec_d on port: %d\n", portNumber);
+    exit(2);
+  }
 
   // Get input message from user
   char * key = argv[2];
@@ -84,7 +91,6 @@ int main(int argc, char *argv[])
 
   if (strcmp(errorToken, "ERROR") == 0)
   {
-    strcat(errorToken, buffer); 
     error(buff);
   }
   //strcat(errorToken, buff);

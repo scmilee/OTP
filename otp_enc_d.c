@@ -99,8 +99,7 @@ void encryptFile(char* keyfile, char* textfile, int textfileSize,char *buffer,in
     if (index == -1)
     {
       //send an error back to the client for complete closure
-      charsRead = send(establishedConnectionFD, "", 0, 0); 
-      error("Error invalid characters in file.\n");
+      charsRead = send(establishedConnectionFD, "ERROR otp_enc error: input contains bad characters;", 51, 0);
       close(establishedConnectionFD); // Close the existing socket which is connected to the client
       exit(1);
     }
@@ -195,7 +194,7 @@ int main(int argc, char *argv[])
       //throw error if the keyfile size is too small
       if (keyfileSize < textfileSize){
         //send an error back to the client for complete closure
-         charsRead = send(establishedConnectionFD, "ERROR Key Size is Too Small;", 28, 0); 
+         charsRead = send(establishedConnectionFD, "ERROR Key provided is too small;", 32, 0); 
         close(establishedConnectionFD); // Close the existing socket which is connected to the client
          exit(1);
       }
