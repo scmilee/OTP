@@ -58,32 +58,26 @@ char* ReadFile(char *filename, int* string_size){
    char *buffer = NULL;
    int  read_size;
    FILE *handler = fopen(filename, "r");
-
+//if theres a file
    if (handler)
    {
-      // Seek the last byte of the file
       fseek(handler, 0, SEEK_END);
-      // Offset from the first to the last byte, or in other words, filesize
+      //get the size
       *string_size = ftell(handler);
       // go back to the start of the file
       rewind(handler);
-
-      // Allocate a string that can hold it all
       buffer = (char*) malloc(sizeof(char) * (*string_size + 1) );
-      // Read it all in one operation
+      //read it into the mallocd buffer
       read_size = fread(buffer, sizeof(char), *string_size, handler);
-      // fread doesn't set it so put a \0 in the last position
-      // and buffer is now officially a string
       buffer[*string_size] = '\0';
 
+      //clear and free buffer when done
       if (*string_size != read_size)
       {
-        // Something went wrong, throw away the memory and set
-        // the buffer to NULL
         free(buffer);
         buffer = NULL;
       }
-      // Always remember to close the file.
+      //close the file
       fclose(handler);
   }
 
@@ -106,7 +100,7 @@ void encryptFile(char* keyfile, char* textfile, int textfileSize,char *buffer,in
     {
       //send an error back to the client for complete closure
       charsRead = send(establishedConnectionFD, "", 0, 0); 
-      error("Error invalid characters in file.");
+      error("Error invalid characters in file.\n");
       close(establishedConnectionFD); // Close the existing socket which is connected to the client
       exit(1);
     }
@@ -184,9 +178,9 @@ int main(int argc, char *argv[])
       if (strcmp(buffer, "otp_enc")!= 0)
       {
         //send an error back to the client for complete closure
-         charsRead = send(establishedConnectionFD, "Error only otp_enc can talk with this server.;", 46, 0); 
+         charsRead = send(establishedConnectionFD, "ERROR only otp_enc can talk with this server.;", 46, 0); 
         close(establishedConnectionFD); // Close the existing socket which is connected to the client
-         exit(1);
+         exit(0);
       }
       //key will hold the key while buffer will hold the textfile for encryption 
       char* key;
@@ -194,21 +188,18 @@ int main(int argc, char *argv[])
       //create and fill buffers for the key and file contents
       int keyfileSize;
       int textfileSize;
-      
 
       char* keyfile = ReadFile(key,&keyfileSize);
       char* textfile = ReadFile(keyAndtext,&textfileSize);
-
-      
+  
       //throw error if the keyfile size is too small
       if (keyfileSize < textfileSize){
         //send an error back to the client for complete closure
-         charsRead = send(establishedConnectionFD, "Key Size is Too small;", 22, 0); 
+         charsRead = send(establishedConnectionFD, "ERROR Key Size is Too Small;", 28, 0); 
         close(establishedConnectionFD); // Close the existing socket which is connected to the client
          exit(1);
       }
 
-      
       char * encryptedFile;
       encryptedFile = malloc(textfileSize + 1);
       encryptFile(keyfile, textfile, textfileSize, encryptedFile, establishedConnectionFD);

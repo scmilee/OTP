@@ -76,8 +76,20 @@ int main(int argc, char *argv[])
   //remove the identifier for the end of the file
   removecolon = strchr(buff, ';');
   *removecolon = '\0';
+
+  //checking to see if message from server was an error or not
+  //to output to perror according to specs
+  char* errorToken;
+  errorToken = strtok(buffer, " ");
+
+  if (strcmp(errorToken, "ERROR") == 0)
+  {
+    strcat(errorToken, buffer); 
+    error(buff);
+  }
+  //strcat(errorToken, buff);
+  printf("%s\n", buff );
   if (charsRead < 0) error("CLIENT: ERROR reading from socket");
-  printf("%s\n", buff);
   close(socketFD); // Close the socket
   free(rackage);
   return 0;

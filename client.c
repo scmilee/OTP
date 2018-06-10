@@ -70,8 +70,19 @@ int main(int argc, char *argv[])
   }
   removecolon = strchr(buff, ';');
   *removecolon = '\0';
+  
+  //checking to see if message from server was an error or not
+  char* errorToken;
+  errorToken = strtok(buffer, " ");
+//put the two back together and send it off to perror
+  if (strcmp(errorToken, "ERROR") == 0)
+  {
+    strcat(errorToken, buffer); 
+    error(buff);
+  }
+  //strcat(errorToken, buff);
+  printf("%s\n", buff );
 	if (charsRead < 0) error("CLIENT: ERROR reading from socket");
-	printf("%s\n", buff);
 	close(socketFD); // Close the socket
 	//free(package);
   return 0;
