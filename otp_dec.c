@@ -9,6 +9,12 @@
 
 void error(const char *msg) { 
 
+  if (strcmp(msg, "ERROR only otp_enc can talk with this server."))
+  {
+  fprintf(stderr, "%s\n", msg);
+   exit(2);
+  }
+
   fprintf(stderr, "%s\n", msg);
    exit(1);
 

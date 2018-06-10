@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
       if (strcmp(buffer, "otp_dec")!= 0)
       {
         //send an error back to the client for complete closure
-         charsRead = send(establishedConnectionFD, "ERROR only otp_dec can talk with this server.;", 46, 0); 
+         charsRead = send(establishedConnectionFD, "ERROR otp_dec can not use otp_enc_d;", 36, 0); 
         close(establishedConnectionFD); // Close the existing socket which is connected to the client
          exit(1);
       }

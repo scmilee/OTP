@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
       if (strcmp(buffer, "otp_enc")!= 0)
       {
         //send an error back to the client for complete closure
-         charsRead = send(establishedConnectionFD, "ERROR only otp_enc can talk with this server.;", 46, 0); 
+         charsRead = send(establishedConnectionFD, "ERROR otp_dec can not use otp_enc_d;", 36, 0); 
         close(establishedConnectionFD); // Close the existing socket which is connected to the client
          exit(0);
       }
@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
       //throw error if the keyfile size is too small
       if (keyfileSize < textfileSize){
         //send an error back to the client for complete closure
-         charsRead = send(establishedConnectionFD, "ERROR Key provided is too small;", 32, 0); 
+         charsRead = send(establishedConnectionFD, "ERROR Key provided is too short;", 32, 0); 
         close(establishedConnectionFD); // Close the existing socket which is connected to the client
          exit(1);
       }
